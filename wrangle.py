@@ -45,14 +45,14 @@ def acquire_zillow_data(use_cache= True):
     '''
     # Command line interaction with SQL server and assignment to dataframe (df)
     df = pd.read_sql(query, get_db_url('zillow'))
-    # Creation of csv file
-    df.to_csv('zillow.csv', index=False)
-    # Renaming columns
+    # Ranaming columns
     df = df.rename(columns = {'bedroomcnt': 'bedrooms',
                               'bathroomcnt': 'bathrooms',
                               'calculatedfinishedsquarefeet': 'area',
                               'taxvaluedollarcnt': 'tax_value',
                               'yearbuilt': 'year_built'})
+    # Creation of csv file
+    df.to_csv('zillow.csv', index=False)
     # Returns the dataframe
     return df
 
