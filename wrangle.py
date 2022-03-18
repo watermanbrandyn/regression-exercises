@@ -52,7 +52,7 @@ def acquire_zillow_data(use_cache= True):
                               'bathroomcnt': 'bathrooms',
                               'calculatedfinishedsquarefeet': 'area',
                               'taxvaluedollarcnt': 'tax_value',
-                              'yearbuilt', 'year_built'})
+                              'yearbuilt': 'year_built'})
     # Returns the dataframe
     return df
 
