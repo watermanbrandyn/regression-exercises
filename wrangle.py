@@ -1,4 +1,4 @@
-# Wrangle
+# Wrangling Zillow Data
 
 # os needed to do local inspection of cache, to see if data exists locally
 import os
@@ -7,9 +7,11 @@ from env import host, user, password
 # Pandas is needed to perform SQL interaction
 import pandas as pd
 import numpy as np
-
 # Splitting function
 from sklearn.model_selection import train_test_split
+# Imputer
+from sklearn.impute import SimpleImputer
+
 
 # Acquire Functions
 
@@ -22,9 +24,10 @@ def get_db_url(db_name, username=user, hostname=host, password=password):
     url = f'mysql+pymysql://{username}:{password}@{host}/{db_name}'
     return url
 
-def get_zillow_data(use_cache= True):
+
+def acquire_zillow_data(use_cache= True):
     '''
-    
+    Acquire the zillow data using SQL query and get_db_url() with credentials from env.py
     '''
     # Checking to see if data already exists in local csv file
     if os.path.exists('zillow.csv') and use_cache:
@@ -44,43 +47,60 @@ def get_zillow_data(use_cache= True):
     df = pd.read_sql(query, get_db_url('zillow'))
     # Creation of csv file
     df.to_csv('zillow.csv', index=False)
+    # Renaming columns
+    df = df.rename(columns = {'bedroomcnt': 'bedrooms',
+                              'bathroomcnt': 'bathrooms',
+                              'calculatedfinishedsquarefeet': 'area',
+                              'taxvaluedollarcnt': 'tax_value',
+                              'yearbuilt', 'year_built'})
     # Returns the dataframe
+    return df
+
+
+# Preparation and Splitting
+
+def remove_outliers(df, k, col_list):
+    '''
+    Removes outliers from a list of columns in df, and returns the df.
+    '''
+    for col in col_list:
+        q1, q3 = df[col].quantile([.25, .75]) # get quartiles
+        iqr = q3 - q1 # calculate interquartile range
+        upper_bound = q3 + k * iqr # upper bound
+        lower_bound = q1 - k * iqr # lower bound
+        # Remove your outliers
+        df = df[(df[col] > lower_bound) & (df[col] < upper_bound)]
+    # Return df
     return df
 
 
 def prep_zillow(df):
     '''
-    
+    Takes in a dataframe and prepares the data. 
+    Returns train, validate, and test dataframes after splitting the data.
     '''
-    # Dropping duplicates in df
-    df.drop_duplicates(inplace=True)
-    # Dropping null values
-    df = df.dropna()
-    # Converting some of our columns to more appropriate data types
-        # bedroomcnt, yearbuilt, calculatedfinishedsquarefeet to int
-        # fips to str
-    to_int = ['bedroomcnt', 'yearbuilt', 'calculatedfinishedsquarefeet']
-    # Looping through our specified lists to change the data type
-    for col in to_int:
-        df[col] = df[col].astype(int)
+    # Remove outliers
+    df = remove_outliers(df, 1.5, ['bedrooms', 'bathrooms', 'area', 'tax_value', 'taxamount'])
+
     # Ensuring that the '0' remains for the fips column after converting to str type
         # Convert to an int first to remove the trailing decimal
     df.fips = df.fips.astype(int)
     df.fips = df.fips.astype(str)
     df.fips = '0' + df.fips
-    # Distinguishing our categorical columns
-    cat_cols = [col for col in df.columns if df[col].dtype == 'O']
-    # Encoding our categorical columns
-    for col in cat_cols:
-        # Create the dummy df
-        dummy_df = pd.get_dummies(df[col],
-                            prefix = df[col].name,
-                            drop_first = True,
-                            dummy_na = False)
-        # Add the dummy vars to the df
-        df = pd.concat([df, dummy_df], axis=1)
+    
     # Split our df in to train, validate, and test splits (3 df)
     train, validate, test = zillow_split(df)
+
+    # Impute year built using mode
+    imputer = SimpleImputer(strategy='median')
+    # Fit on train df
+    imputer.fit(train[['year_built']])
+    # Apply imputer to your splits
+    train[['year_built']] = imputer.transform(train[['year_built']])
+    validate[['year_built']] = imputer.transform(validate[['year_built']])
+    test[['year_built']] = imputer.transform(test[['year_built']])
+
+    # Return train, validate, test splits
     return train, validate, test
 
 
@@ -101,7 +121,12 @@ def zillow_split(df):
 
 
 def wrangle_zillow():
+    '''
+    Using acquire and preparation functions to 'wrangle' the zillow data. Returns train, validate, and test dataframes.
+    '''
     # Acquire the data
-    df = get_zillow_data()
+    df = acquire_zillow_data()
     # Prep the data (returns train, validate, test)
-    return prep_zillow(df)
+    train, validate, test = prep_zillow(df)
+    # Return split dataframes
+    return train, validate, test
