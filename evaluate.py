@@ -11,7 +11,6 @@ import numpy as np
 
 # visualization
 import seaborn as sns
-%matplotlib inline
 import matplotlib.pyplot as plt
 
 # stats and math
@@ -32,6 +31,13 @@ import warnings
 warnings.filterwarnings("ignore")
 
 np.random.seed(123)
+
+
+
+def evaluate_things():
+    '''
+    
+    '''
 
 
 def plot_residuals(y, yhat):
@@ -71,18 +77,52 @@ def regression_errors(y, yhat):
     This function takes in y and yhat (predictions) variables and returns the sum of squared errors (SSE), explained sum of squares (ESS),
     total sum of squares (TSS), mean squared error (MSE), and root mean squared error (RMSE)
     '''
+    # Calculate yhat (predictions) residuals
+    yhat_residual = yhat - y
 
+    # Sum of Squared Errors
+    SSE = sum(yhat_residual**2)
+    # Explained sum of squares
+    ESS = sum((yhat - y.mean())**2)
+    # Total sum of squares
+    TSS = ESS + SSE
+    # Mean Squared Error
+    MSE = mean_squared_error(y, yhat)
+    # Root mean squared error
+    RMSE = sqrt(MSE)
+    # print(SSE)
+    # print(ESS)
+    # print(TSS)
+    # print(MSE)
+    # print(RMSE)
+    # Return SSE, ESS, TSS, MSE, RMSE
+    return SSE, ESS, TSS, MSE, RMSE
 
 def baseline_mean_errors(y):
     '''
     This function takes in y variables and returns SSE, MSE, and RMSE for the baseline
     '''
+    # Establish the baseline target value
+    baseline = np.full_like(y, y.mean())
+    # Compute the baseline residual
+    baseline_residual = baseline - y
+
+    # Sum of Squared Errors
+    SSE_base = sum(baseline_residual**2)
+    # Mean Squared Error
+    MSE_base = mean_squared_error(y, baseline)
+    # Root mean squared error
+    RMSE_base = sqrt(MSE_base)
+
+    # Return SSE, MSE, and RMSE
+    return SSE_base, MSE_base, RMSE_base 
 
 
 def better_than_baseline(y, yhat):
     '''
     This function takes in y and yhat (predictions) variables and returns assessment of model performance compared to baseline.
     '''
+    
 
 
 
