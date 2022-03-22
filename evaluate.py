@@ -36,9 +36,34 @@ np.random.seed(123)
 
 def plot_residuals(y, yhat):
     '''
-    This function takes in y and yhat (predictions) variables to create residual plots for the model and baseline regression fits.
+    This function takes in y and yhat (predictions) variables to create a residual plots for baseline and model. 
     '''
-    
+    # Establish the baseline target value
+    baseline = y.mean()
+    # Compute the baseline residual
+    baseline_residual = baseline - y
+    # Calculate yhat (predictions) residuals
+    yhat_residual = yhat - y
+
+    # Creation of scatterplot using 
+    plt.figure(figsize=(13,7))
+
+    # rows, cols, placement
+    # one row, two columns, first plot
+    # Baseline Graph
+    plt.subplot(121)
+    plt.scatter(y, baseline_residual)
+    plt.axhline(y=0, ls=':')
+    plt.xlabel('Tip')
+    plt.ylabel('Residual')
+    plt.title('Baseline Residuals')
+    # Model Graph
+    plt.subplot(122)
+    plt.scatter(y, yhat_residual)
+    plt.axhline(y=0, ls=':')
+    plt.xlabel('Tip')
+    plt.ylabel('Residual')
+    plt.title('OLS model Residuals')
 
 
 def regression_errors(y, yhat):
