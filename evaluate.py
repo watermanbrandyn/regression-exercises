@@ -33,13 +33,6 @@ warnings.filterwarnings("ignore")
 np.random.seed(123)
 
 
-
-def evaluate_things():
-    '''
-    
-    '''
-
-
 def plot_residuals(y, yhat):
     '''
     This function takes in y and yhat (predictions) variables to create a residual plots for baseline and model. 
@@ -98,6 +91,7 @@ def regression_errors(y, yhat):
     # Return SSE, ESS, TSS, MSE, RMSE
     return SSE, ESS, TSS, MSE, RMSE
 
+
 def baseline_mean_errors(y):
     '''
     This function takes in y variables and returns SSE, MSE, and RMSE for the baseline
@@ -121,7 +115,11 @@ def baseline_mean_errors(y):
 def better_than_baseline(y, yhat):
     '''
     This function takes in y and yhat (predictions) variables and returns assessment of model performance compared to baseline.
+    Using the SSE metric.
     '''
+    sse_base = ((y - y.mean()) ** 2).sum()
+    sse_model = ((y - yhat) ** 2).sum()
+    return sse_model < sse_base
     
 
 
