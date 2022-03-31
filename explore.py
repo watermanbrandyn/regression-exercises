@@ -128,3 +128,15 @@ def plot_variable_pairs(df):
 def months_to_years(df):
     df['tenure_years'] = round(df['tenure'] / 12).astype('int')
     return df
+
+def plot_categorical_and_continuous_vars(df, conts, cats):
+    for col in conts:
+        sns.displot(x=col, data=df, kind='kde')
+        plt.show()
+        sns.boxplot(df[col])
+        plt.show()
+        sns.histplot(df[col])
+        plt.show()
+    for col in cats:
+        sns.countplot(x=col, data=df)
+        plt.show()
